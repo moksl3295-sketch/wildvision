@@ -5,113 +5,131 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WildVision — Голосование</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0A1130;
-    --bg2:#0F1A44;
-    --card:#131C4C;
-    --card-hover:#182258;
-    --blue:#3D5AFE;
-    --blue-light:#7C94FF;
+    --bg:#080D24;
+    --bg2:#0D1538;
+    --card:#111A42;
+    --card-hover:#16204F;
+    --card-active:#182660;
+    --blue:#4361FF;
+    --blue-light:#8AA0FF;
     --pink:#FF3D71;
     --white:#F5F7FF;
-    --grey:#8A93C4;
-    --line:rgba(245,247,255,0.10);
+    --grey:#8992BE;
+    --grey-dim:#5E6690;
+    --line:rgba(245,247,255,0.09);
+    --ok:#3DDC97;
+    --err:#FF6B6B;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
-    background:var(--bg);
+    background:
+      radial-gradient(900px 420px at 50% -10%, rgba(67,97,255,0.16), transparent 60%),
+      var(--bg);
     color:var(--white);
     font-family:'Inter', sans-serif;
     min-height:100vh;
-    padding-bottom:110px;
+    padding-bottom:120px;
   }
 
   /* ---- NAV ---- */
   nav{
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 24px; border-bottom:1px solid var(--line);
-    background:var(--bg2);
+    background:rgba(13,21,56,0.85);
+    backdrop-filter:blur(10px);
     position:sticky; top:0; z-index:20;
   }
   .logo{font-weight:800; font-size:18px; letter-spacing:-0.01em;}
   .logo span{color:var(--blue-light);}
   .tag{
     font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.12em;
-    color:var(--grey); border:1px solid var(--line); padding:5px 10px; border-radius:6px;
-    text-transform:uppercase;
+    color:var(--blue-light); border:1px solid rgba(67,97,255,0.35); background:rgba(67,97,255,0.08);
+    padding:5px 10px; border-radius:6px; text-transform:uppercase;
   }
 
   .wrap{max-width:640px; margin:0 auto; padding:0 20px;}
 
   /* ---- HERO ---- */
-  .hero{padding:40px 0 24px; text-align:center;}
-  .hero h1{font-size:clamp(26px,6vw,34px); font-weight:800; letter-spacing:-0.01em;}
-  .hero p{color:var(--grey); font-size:14px; margin-top:10px; line-height:1.5;}
+  .hero{padding:44px 0 26px; text-align:center;}
+  .hero h1{font-size:clamp(27px,6vw,36px); font-weight:900; letter-spacing:-0.02em;}
+  .hero p{color:var(--grey); font-size:14px; margin-top:10px; line-height:1.55; max-width:440px; margin-inline:auto;}
   .rules{
-    display:inline-flex; gap:16px; margin-top:18px; flex-wrap:wrap; justify-content:center;
+    display:inline-flex; gap:10px; margin-top:20px; flex-wrap:wrap; justify-content:center;
     font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--blue-light);
   }
-  .rules span{border:1px solid rgba(61,90,254,0.35); background:rgba(61,90,254,0.08); padding:6px 10px; border-radius:6px;}
+  .rules span{border:1px solid rgba(67,97,255,0.3); background:rgba(67,97,255,0.07); padding:7px 12px; border-radius:99px;}
 
   /* ---- LIST ---- */
-  .list{margin-top:20px; border-top:1px solid var(--line);}
+  .list{margin-top:24px; display:flex; flex-direction:column; gap:10px;}
   .item{
     display:flex; align-items:center; gap:14px;
-    padding:18px 4px; border-bottom:1px solid var(--line);
-    transition:background .15s ease;
+    padding:16px; border-radius:14px;
+    background:var(--card); border:1px solid var(--line);
+    transition:background .18s ease, border-color .18s ease, transform .12s ease;
   }
-  .item.active{background:rgba(61,90,254,0.06);}
-  .item .flag{font-size:28px; width:34px; flex-shrink:0;}
+  .item.active{background:var(--card-active); border-color:rgba(67,97,255,0.4);}
+  .item .flag{
+    font-size:24px; width:46px; height:46px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(245,247,255,0.05); border-radius:12px;
+  }
   .item .meta{flex:1; min-width:0;}
   .item .meta .country{
     font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.1em;
-    text-transform:uppercase; color:var(--grey);
+    text-transform:uppercase; color:var(--grey-dim);
   }
-  .item .meta .artist{font-weight:700; font-size:16px; margin-top:2px;}
+  .item .meta .artist{font-weight:700; font-size:16px; margin-top:3px; letter-spacing:-0.01em;}
   .item .meta .song{font-size:13px; color:var(--grey); margin-top:1px;}
 
-  .stepper{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .stepper{display:flex; align-items:center; gap:8px; flex-shrink:0;}
   .stepper button{
-    width:30px; height:30px; border-radius:8px; border:1px solid var(--line);
-    background:var(--card); color:var(--white); font-size:16px; font-weight:700;
+    width:32px; height:32px; border-radius:9px; border:1px solid var(--line);
+    background:rgba(245,247,255,0.04); color:var(--white); font-size:16px; font-weight:700;
     cursor:pointer; display:flex; align-items:center; justify-content:center;
     transition:background .15s ease, border-color .15s ease, opacity .15s ease;
   }
-  .stepper button:hover:not(:disabled){border-color:var(--blue-light); background:var(--card-hover);}
-  .stepper button:disabled{opacity:0.3; cursor:not-allowed;}
+  .stepper button:hover:not(:disabled){border-color:var(--blue-light); background:rgba(67,97,255,0.14);}
+  .stepper button:disabled{opacity:0.25; cursor:not-allowed;}
   .stepper .count{
-    width:22px; text-align:center; font-family:'JetBrains Mono', monospace;
-    font-weight:700; font-size:15px;
+    width:20px; text-align:center; font-family:'JetBrains Mono', monospace;
+    font-weight:700; font-size:15px; color:var(--blue-light);
   }
 
   /* ---- FIXED CART BAR ---- */
   .cartbar{
     position:fixed; bottom:0; left:0; right:0;
-    background:var(--bg2); border-top:1px solid var(--line);
-    padding:14px 20px; z-index:30;
+    background:rgba(13,21,56,0.92); backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+    z-index:30;
   }
   .cartbar-inner{max-width:640px; margin:0 auto; display:flex; align-items:center; gap:16px;}
   .cart-info{flex:1;}
-  .cart-info .label{font-size:12px; color:var(--grey); font-family:'JetBrains Mono', monospace;}
-  .cart-info .count{font-weight:800; font-size:18px; color:var(--white);}
-  .progress{height:5px; background:rgba(255,255,255,0.08); border-radius:99px; margin-top:6px; overflow:hidden;}
+  .cart-info .label{font-size:11px; color:var(--grey); font-family:'JetBrains Mono', monospace; letter-spacing:0.06em;}
+  .cart-info .count{font-weight:800; font-size:16px; color:var(--white);}
+  .progress{height:5px; background:rgba(255,255,255,0.07); border-radius:99px; margin-top:7px; overflow:hidden;}
   .progress-fill{height:100%; background:linear-gradient(90deg, var(--blue), var(--pink)); border-radius:99px; transition:width .25s ease; width:0%;}
   .submit-btn{
     font-family:'Inter', sans-serif; font-weight:700; font-size:14px;
-    background:var(--blue); color:#fff; border:none; border-radius:10px;
-    padding:13px 24px; cursor:pointer; white-space:nowrap;
-    transition:opacity .15s ease, transform .1s ease;
+    background:var(--blue); color:#fff; border:none; border-radius:11px;
+    padding:14px 26px; cursor:pointer; white-space:nowrap;
+    transition:opacity .15s ease, transform .1s ease, background .15s ease;
+    min-width:120px;
   }
-  .submit-btn:hover:not(:disabled){opacity:0.9;}
+  .submit-btn:hover:not(:disabled){opacity:0.92;}
   .submit-btn:disabled{opacity:0.3; cursor:not-allowed;}
   .submit-btn:active{transform:scale(0.97);}
+  .submit-btn.retry{background:var(--err);}
 
   .status-msg{
     text-align:center; font-family:'JetBrains Mono', monospace; font-size:12px;
-    color:var(--blue-light); padding:14px 0 2px;
+    padding:14px 20px 2px; min-height:18px; color:var(--blue-light);
   }
+  .status-msg.ok{color:var(--ok);}
+  .status-msg.err{color:var(--err);}
 
   /* ---- ADMIN ---- */
   #admin{max-width:640px; margin:50px auto 0; padding:0 20px;}
@@ -130,7 +148,7 @@
   .voter-line{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--grey); padding:6px 0; border-bottom:1px dashed var(--line);}
   .voter-line:last-child{border-bottom:none;}
 
-  footer{text-align:center; color:var(--grey); font-size:11px; margin-top:50px; padding-bottom:20px; font-family:'JetBrains Mono', monospace; letter-spacing:0.06em;}
+  footer{text-align:center; color:var(--grey-dim); font-size:11px; margin-top:50px; padding-bottom:20px; font-family:'JetBrains Mono', monospace; letter-spacing:0.06em;}
 </style>
 </head>
 <body>
@@ -181,16 +199,31 @@ const SONGS = [
 ];
 const MAX_VOTES = 10;
 
-let cart = {};        // songId -> count, current unsubmitted cart
+let cart = {};
 SONGS.forEach(s => cart[s.id] = 0);
 let voterId = null;
 let submitted = false;
+let lastError = false;
 
 const list = document.getElementById('list');
 const cartCount = document.getElementById('cartCount');
 const progressFill = document.getElementById('progressFill');
 const submitBtn = document.getElementById('submitBtn');
 const statusMsg = document.getElementById('statusMsg');
+
+/* ---- storage helper with retries: transient failures no longer surface as a hard error ---- */
+async function storageCall(fn, attempts = 3){
+  let lastErr;
+  for(let i = 0; i < attempts; i++){
+    try{
+      return await fn();
+    }catch(e){
+      lastErr = e;
+      if(i < attempts - 1) await new Promise(r => setTimeout(r, 350 * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
 
 function totalCart(){ return Object.values(cart).reduce((a,b) => a+b, 0); }
 
@@ -208,9 +241,9 @@ function renderList(){
         ${s.song ? `<div class="song">«${s.song}»</div>` : ''}
       </div>
       <div class="stepper">
-        <button data-act="minus" data-id="${s.id}" ${cart[s.id]===0 ? 'disabled' : ''}>−</button>
+        <button data-act="minus" data-id="${s.id}" ${(cart[s.id]===0 || submitted) ? 'disabled' : ''}>−</button>
         <div class="count">${cart[s.id]}</div>
-        <button data-act="plus" data-id="${s.id}" ${total>=MAX_VOTES ? 'disabled' : ''}>+</button>
+        <button data-act="plus" data-id="${s.id}" ${(total>=MAX_VOTES || submitted) ? 'disabled' : ''}>+</button>
       </div>
     `;
     list.appendChild(row);
@@ -218,7 +251,16 @@ function renderList(){
   list.querySelectorAll('button').forEach(b => b.addEventListener('click', onStep));
   cartCount.textContent = total;
   progressFill.style.width = (total/MAX_VOTES*100) + '%';
-  submitBtn.disabled = total === 0 || submitted;
+
+  if(lastError){
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Повторить';
+    submitBtn.classList.add('retry');
+  } else {
+    submitBtn.disabled = total === 0 || submitted;
+    submitBtn.textContent = submitted ? 'Учтено ✓' : 'Оформить';
+    submitBtn.classList.remove('retry');
+  }
 }
 
 function onStep(e){
@@ -233,11 +275,13 @@ function onStep(e){
 
 async function ensureVoterId(){
   try{
-    const r = await window.storage.get('voter-id', false);
+    const r = await storageCall(() => window.storage.get('voter-id', false));
     voterId = r.value;
   }catch(e){
     voterId = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-    try{ await window.storage.set('voter-id', voterId, false); }catch(e2){}
+    try{ await storageCall(() => window.storage.set('voter-id', voterId, false)); }catch(e2){
+      // even if this personal save fails, we still have a voterId for this session
+    }
   }
 }
 
@@ -245,26 +289,35 @@ async function submitVote(){
   const total = totalCart();
   if(total === 0) return;
   submitBtn.disabled = true;
-  statusMsg.textContent = 'Отправка…';
+  submitBtn.textContent = 'Отправка…';
+  statusMsg.textContent = '';
+  statusMsg.className = 'status-msg';
+  lastError = false;
+
   try{
-    await window.storage.set('votes:' + voterId, JSON.stringify(cart), true);
-    await window.storage.set('my-cart', JSON.stringify(cart), false);
+    // the shared write is the one that matters for the count — retry it hard
+    await storageCall(() => window.storage.set('votes:' + voterId, JSON.stringify(cart), true), 4);
     submitted = true;
     statusMsg.textContent = '✓ Голоса учтены — спасибо за участие в WildVision!';
+    statusMsg.classList.add('ok');
+    // best-effort personal record, so the page remembers you voted on reload
+    storageCall(() => window.storage.set('my-cart', JSON.stringify(cart), false)).catch(() => {});
   }catch(e){
-    statusMsg.textContent = 'Не удалось отправить голоса. Попробуй ещё раз.';
-    submitBtn.disabled = false;
+    lastError = true;
+    statusMsg.textContent = 'Не получилось отправить голоса — нажми «Повторить».';
+    statusMsg.classList.add('err');
   }
   renderList();
 }
 
 async function loadOwnVote(){
   try{
-    const r = await window.storage.get('my-cart', false);
+    const r = await storageCall(() => window.storage.get('my-cart', false));
     const saved = JSON.parse(r.value);
     Object.keys(saved).forEach(id => { if(cart[id] !== undefined) cart[id] = saved[id]; });
     submitted = true;
     statusMsg.textContent = '✓ Ты уже голосовал(а) в этом раунде.';
+    statusMsg.classList.add('ok');
   }catch(e){}
 }
 
@@ -281,11 +334,11 @@ async function maybeRenderAdmin(){
   const totals = {}; SONGS.forEach(s => totals[s.id] = 0);
   let voterEntries = [];
   try{
-    const l = await window.storage.list('votes:', true);
+    const l = await storageCall(() => window.storage.list('votes:', true));
     const keys = (l && l.keys) || [];
     for(const k of keys){
       try{
-        const r = await window.storage.get(k, true);
+        const r = await storageCall(() => window.storage.get(k, true));
         const c = JSON.parse(r.value);
         Object.keys(c).forEach(id => { if(totals[id] !== undefined) totals[id] += c[id]; });
         voterEntries.push({voter: k.replace('votes:',''), cart: c});
