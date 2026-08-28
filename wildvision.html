@@ -20,6 +20,7 @@
     --grey-dim:#5E6690;
     --line:rgba(245,247,255,0.09);
     --ok:#3DDC97;
+    --err:#FF6B6B;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -110,17 +111,36 @@
     font-family:'Inter', sans-serif; font-weight:700; font-size:14px;
     background:var(--blue); color:#fff; border:none; border-radius:11px;
     padding:14px 26px; cursor:pointer; white-space:nowrap;
-    transition:opacity .15s ease, transform .1s ease;
+    transition:opacity .15s ease, transform .1s ease, background .15s ease;
     min-width:120px;
   }
   .submit-btn:hover:not(:disabled){opacity:0.92;}
   .submit-btn:disabled{opacity:0.3; cursor:not-allowed;}
   .submit-btn:active{transform:scale(0.97);}
+  .submit-btn.retry{background:var(--err);}
 
   .status-msg{
     text-align:center; font-family:'JetBrains Mono', monospace; font-size:12px;
-    padding:14px 20px 2px; min-height:18px; color:var(--ok);
+    padding:14px 20px 2px; min-height:18px; color:var(--blue-light);
   }
+  .status-msg.ok{color:var(--ok);}
+  .status-msg.err{color:var(--err);}
+
+  #admin{max-width:640px; margin:50px auto 0; padding:0 20px;}
+  .admin-title{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--pink); margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .admin-title::after{content:''; flex:1; height:1px; background:var(--line);}
+  .admin-box{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:14px;}
+  .admin-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .admin-row:last-child{border-bottom:none;}
+  .admin-row .af{font-size:16px; width:22px;}
+  .admin-row .an{flex:1; color:var(--grey);}
+  .admin-row .apts{font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--white);}
+  .voter-line{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--grey); padding:6px 0; border-bottom:1px dashed var(--line);}
+  .voter-line:last-child{border-bottom:none;}
 
   footer{text-align:center; color:var(--grey-dim); font-size:11px; margin-top:50px; padding-bottom:20px; font-family:'JetBrains Mono', monospace; letter-spacing:0.06em;}
 </style>
@@ -154,9 +174,19 @@
   </div>
 </div>
 
+<div id="admin" style="display:none;">
+  <div class="admin-title">Admin · Результаты</div>
+  <div class="admin-box" id="adminTotals"></div>
+  <div class="admin-title">Admin · Голосующие</div>
+  <div class="admin-box" id="adminVoters"></div>
+</div>
+
 <footer>WILDVISION · FAN-EDITION · 2026</footer>
 
 <script>
+// Google Apps Script Web App URL — backend for shared vote storage (Google Sheet).
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_TJfrJ9MOOahH9XchMPIo2dkN9Ux3m8pfQ0Qrx6-Y3hgrDcgTjUHHxfqoznaUi8NBfg/exec';
+
 const SONGS = [
   {id:'usa',     flag:'🇺🇸', country:'США',                   artist:'Lady Gaga', song:'Paparazzi'},
   {id:'russia',  flag:'🇷🇺', country:'Россия',                 artist:'Dead Blonde', song:''},
@@ -166,10 +196,13 @@ const SONGS = [
 ];
 const MAX_VOTES = 10;
 const STORAGE_KEY = 'wildvision-my-cart';
+const VOTER_KEY = 'wildvision-voter-id';
 
 let cart = {};
 SONGS.forEach(s => cart[s.id] = 0);
 let submitted = false;
+let lastError = false;
+let voterId = null;
 
 const list = document.getElementById('list');
 const cartCount = document.getElementById('cartCount');
@@ -178,6 +211,19 @@ const submitBtn = document.getElementById('submitBtn');
 const statusMsg = document.getElementById('statusMsg');
 
 function totalCart(){ return Object.values(cart).reduce((a,b) => a+b, 0); }
+
+function getVoterId(){
+  try{
+    let id = localStorage.getItem(VOTER_KEY);
+    if(!id){
+      id = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+      localStorage.setItem(VOTER_KEY, id);
+    }
+    return id;
+  }catch(e){
+    return 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+}
 
 function renderList(){
   list.innerHTML = '';
@@ -203,8 +249,16 @@ function renderList(){
   list.querySelectorAll('button').forEach(b => b.addEventListener('click', onStep));
   cartCount.textContent = total;
   progressFill.style.width = (total/MAX_VOTES*100) + '%';
-  submitBtn.disabled = total === 0 || submitted;
-  submitBtn.textContent = submitted ? 'Учтено ✓' : 'Оформить';
+
+  if(lastError){
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Повторить';
+    submitBtn.classList.add('retry');
+  } else {
+    submitBtn.disabled = total === 0 || submitted;
+    submitBtn.textContent = submitted ? 'Учтено ✓' : 'Оформить';
+    submitBtn.classList.remove('retry');
+  }
 }
 
 function onStep(e){
@@ -217,16 +271,32 @@ function onStep(e){
   renderList();
 }
 
-function submitVote(){
+async function submitVote(){
   const total = totalCart();
   if(total === 0) return;
-  submitted = true;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Отправка…';
+  statusMsg.textContent = '';
+  statusMsg.className = 'status-msg';
+  lastError = false;
+
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    // text/plain body avoids a CORS preflight against Apps Script
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({voterId: voterId, votes: cart, ts: Date.now()})
+    });
+    if(!res.ok) throw new Error('bad status');
+
+    submitted = true;
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }catch(e){}
+    statusMsg.textContent = '✓ Голоса учтены — спасибо за участие в WildVision!';
+    statusMsg.classList.add('ok');
   }catch(e){
-    // private/incognito mode can block storage — the vote still counts for this visit
+    lastError = true;
+    statusMsg.textContent = 'Не получилось отправить голоса — нажми «Повторить».';
+    statusMsg.classList.add('err');
   }
-  statusMsg.textContent = '✓ Голоса учтены — спасибо за участие в WildVision!';
   renderList();
 }
 
@@ -238,13 +308,54 @@ function loadOwnVote(){
     Object.keys(saved).forEach(id => { if(cart[id] !== undefined) cart[id] = saved[id]; });
     submitted = true;
     statusMsg.textContent = '✓ Ты уже голосовал(а) в этом браузере.';
+    statusMsg.classList.add('ok');
   }catch(e){}
 }
 
-function init(){
+/* ---- Admin view: open the page with ?admin at the end of the link ---- */
+async function maybeRenderAdmin(){
+  if(!new URLSearchParams(location.search).has('admin')) return;
+  document.getElementById('admin').style.display = 'block';
+
+  const totalsBox = document.getElementById('adminTotals');
+  const votersBox = document.getElementById('adminVoters');
+  totalsBox.innerHTML = 'Загрузка…';
+  votersBox.innerHTML = '';
+
+  try{
+    const res = await fetch(SCRIPT_URL, {method: 'GET'});
+    const data = await res.json();
+    const totals = data.totals || {};
+    const voters = data.voters || [];
+
+    const ranked = SONGS.map(s => ({...s, pts: totals[s.id] || 0})).sort((a,b) => b.pts - a.pts);
+    totalsBox.innerHTML = ranked.map(s => `
+      <div class="admin-row">
+        <div class="af">${s.flag}</div>
+        <div class="an">${s.country} — ${s.artist}</div>
+        <div class="apts">${s.pts}</div>
+      </div>
+    `).join('');
+
+    if(voters.length === 0){
+      votersBox.innerHTML = '<div class="voter-line">Пока никто не проголосовал</div>';
+    } else {
+      votersBox.innerHTML = voters.map(v => {
+        const parts = SONGS.filter(s => (v.votes[s.id] || 0) > 0).map(s => `${s.flag}×${v.votes[s.id]}`).join('  ');
+        return `<div class="voter-line">${String(v.voter).slice(0,10)}… → ${parts || '—'}</div>`;
+      }).join('');
+    }
+  }catch(e){
+    totalsBox.innerHTML = 'Не удалось загрузить результаты. Проверь ссылку скрипта и доступ «Все».';
+  }
+}
+
+async function init(){
+  voterId = getVoterId();
   loadOwnVote();
   renderList();
   submitBtn.addEventListener('click', submitVote);
+  await maybeRenderAdmin();
 }
 
 init();
