@@ -11,7 +11,6 @@
     --bg:#080D24;
     --bg2:#0D1538;
     --card:#111A42;
-    --card-hover:#16204F;
     --card-active:#182660;
     --blue:#4361FF;
     --blue-light:#8AA0FF;
@@ -21,7 +20,6 @@
     --grey-dim:#5E6690;
     --line:rgba(245,247,255,0.09);
     --ok:#3DDC97;
-    --err:#FF6B6B;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -34,7 +32,6 @@
     padding-bottom:120px;
   }
 
-  /* ---- NAV ---- */
   nav{
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 24px; border-bottom:1px solid var(--line);
@@ -52,7 +49,6 @@
 
   .wrap{max-width:640px; margin:0 auto; padding:0 20px;}
 
-  /* ---- HERO ---- */
   .hero{padding:44px 0 26px; text-align:center;}
   .hero h1{font-size:clamp(27px,6vw,36px); font-weight:900; letter-spacing:-0.02em;}
   .hero p{color:var(--grey); font-size:14px; margin-top:10px; line-height:1.55; max-width:440px; margin-inline:auto;}
@@ -62,13 +58,12 @@
   }
   .rules span{border:1px solid rgba(67,97,255,0.3); background:rgba(67,97,255,0.07); padding:7px 12px; border-radius:99px;}
 
-  /* ---- LIST ---- */
   .list{margin-top:24px; display:flex; flex-direction:column; gap:10px;}
   .item{
     display:flex; align-items:center; gap:14px;
     padding:16px; border-radius:14px;
     background:var(--card); border:1px solid var(--line);
-    transition:background .18s ease, border-color .18s ease, transform .12s ease;
+    transition:background .18s ease, border-color .18s ease;
   }
   .item.active{background:var(--card-active); border-color:rgba(67,97,255,0.4);}
   .item .flag{
@@ -98,7 +93,6 @@
     font-weight:700; font-size:15px; color:var(--blue-light);
   }
 
-  /* ---- FIXED CART BAR ---- */
   .cartbar{
     position:fixed; bottom:0; left:0; right:0;
     background:rgba(13,21,56,0.92); backdrop-filter:blur(10px);
@@ -116,37 +110,17 @@
     font-family:'Inter', sans-serif; font-weight:700; font-size:14px;
     background:var(--blue); color:#fff; border:none; border-radius:11px;
     padding:14px 26px; cursor:pointer; white-space:nowrap;
-    transition:opacity .15s ease, transform .1s ease, background .15s ease;
+    transition:opacity .15s ease, transform .1s ease;
     min-width:120px;
   }
   .submit-btn:hover:not(:disabled){opacity:0.92;}
   .submit-btn:disabled{opacity:0.3; cursor:not-allowed;}
   .submit-btn:active{transform:scale(0.97);}
-  .submit-btn.retry{background:var(--err);}
 
   .status-msg{
     text-align:center; font-family:'JetBrains Mono', monospace; font-size:12px;
-    padding:14px 20px 2px; min-height:18px; color:var(--blue-light);
+    padding:14px 20px 2px; min-height:18px; color:var(--ok);
   }
-  .status-msg.ok{color:var(--ok);}
-  .status-msg.err{color:var(--err);}
-
-  /* ---- ADMIN ---- */
-  #admin{max-width:640px; margin:50px auto 0; padding:0 20px;}
-  .admin-title{
-    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em;
-    text-transform:uppercase; color:var(--pink); margin-bottom:14px;
-    display:flex; align-items:center; gap:10px;
-  }
-  .admin-title::after{content:''; flex:1; height:1px; background:var(--line);}
-  .admin-box{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:14px;}
-  .admin-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px;}
-  .admin-row:last-child{border-bottom:none;}
-  .admin-row .af{font-size:16px; width:22px;}
-  .admin-row .an{flex:1; color:var(--grey);}
-  .admin-row .apts{font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--white);}
-  .voter-line{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--grey); padding:6px 0; border-bottom:1px dashed var(--line);}
-  .voter-line:last-child{border-bottom:none;}
 
   footer{text-align:center; color:var(--grey-dim); font-size:11px; margin-top:50px; padding-bottom:20px; font-family:'JetBrains Mono', monospace; letter-spacing:0.06em;}
 </style>
@@ -180,13 +154,6 @@
   </div>
 </div>
 
-<div id="admin" style="display:none;">
-  <div class="admin-title">Admin · Результаты</div>
-  <div class="admin-box" id="adminTotals"></div>
-  <div class="admin-title">Admin · Голосующие</div>
-  <div class="admin-box" id="adminVoters"></div>
-</div>
-
 <footer>WILDVISION · FAN-EDITION · 2026</footer>
 
 <script>
@@ -198,32 +165,17 @@ const SONGS = [
   {id:'moldova', flag:'🇲🇩', country:'Молдова',                artist:'The Weeknd & Madonna', song:'Popular'}
 ];
 const MAX_VOTES = 10;
+const STORAGE_KEY = 'wildvision-my-cart';
 
 let cart = {};
 SONGS.forEach(s => cart[s.id] = 0);
-let voterId = null;
 let submitted = false;
-let lastError = false;
 
 const list = document.getElementById('list');
 const cartCount = document.getElementById('cartCount');
 const progressFill = document.getElementById('progressFill');
 const submitBtn = document.getElementById('submitBtn');
 const statusMsg = document.getElementById('statusMsg');
-
-/* ---- storage helper with retries: transient failures no longer surface as a hard error ---- */
-async function storageCall(fn, attempts = 3){
-  let lastErr;
-  for(let i = 0; i < attempts; i++){
-    try{
-      return await fn();
-    }catch(e){
-      lastErr = e;
-      if(i < attempts - 1) await new Promise(r => setTimeout(r, 350 * (i + 1)));
-    }
-  }
-  throw lastErr;
-}
 
 function totalCart(){ return Object.values(cart).reduce((a,b) => a+b, 0); }
 
@@ -251,16 +203,8 @@ function renderList(){
   list.querySelectorAll('button').forEach(b => b.addEventListener('click', onStep));
   cartCount.textContent = total;
   progressFill.style.width = (total/MAX_VOTES*100) + '%';
-
-  if(lastError){
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Повторить';
-    submitBtn.classList.add('retry');
-  } else {
-    submitBtn.disabled = total === 0 || submitted;
-    submitBtn.textContent = submitted ? 'Учтено ✓' : 'Оформить';
-    submitBtn.classList.remove('retry');
-  }
+  submitBtn.disabled = total === 0 || submitted;
+  submitBtn.textContent = submitted ? 'Учтено ✓' : 'Оформить';
 }
 
 function onStep(e){
@@ -273,104 +217,34 @@ function onStep(e){
   renderList();
 }
 
-async function ensureVoterId(){
-  try{
-    const r = await storageCall(() => window.storage.get('voter-id', false));
-    voterId = r.value;
-  }catch(e){
-    voterId = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-    try{ await storageCall(() => window.storage.set('voter-id', voterId, false)); }catch(e2){
-      // even if this personal save fails, we still have a voterId for this session
-    }
-  }
-}
-
-async function submitVote(){
+function submitVote(){
   const total = totalCart();
   if(total === 0) return;
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Отправка…';
-  statusMsg.textContent = '';
-  statusMsg.className = 'status-msg';
-  lastError = false;
-
+  submitted = true;
   try{
-    // the shared write is the one that matters for the count — retry it hard
-    await storageCall(() => window.storage.set('votes:' + voterId, JSON.stringify(cart), true), 4);
-    submitted = true;
-    statusMsg.textContent = '✓ Голоса учтены — спасибо за участие в WildVision!';
-    statusMsg.classList.add('ok');
-    // best-effort personal record, so the page remembers you voted on reload
-    storageCall(() => window.storage.set('my-cart', JSON.stringify(cart), false)).catch(() => {});
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
   }catch(e){
-    lastError = true;
-    statusMsg.textContent = 'Не получилось отправить голоса — нажми «Повторить».';
-    statusMsg.classList.add('err');
+    // private/incognito mode can block storage — the vote still counts for this visit
   }
+  statusMsg.textContent = '✓ Голоса учтены — спасибо за участие в WildVision!';
   renderList();
 }
 
-async function loadOwnVote(){
+function loadOwnVote(){
   try{
-    const r = await storageCall(() => window.storage.get('my-cart', false));
-    const saved = JSON.parse(r.value);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const saved = JSON.parse(raw);
     Object.keys(saved).forEach(id => { if(cart[id] !== undefined) cart[id] = saved[id]; });
     submitted = true;
-    statusMsg.textContent = '✓ Ты уже голосовал(а) в этом раунде.';
-    statusMsg.classList.add('ok');
+    statusMsg.textContent = '✓ Ты уже голосовал(а) в этом браузере.';
   }catch(e){}
 }
 
-/* ---- Admin view: open the page with ?admin at the end of the link ---- */
-async function maybeRenderAdmin(){
-  if(!new URLSearchParams(location.search).has('admin')) return;
-  document.getElementById('admin').style.display = 'block';
-
-  const totalsBox = document.getElementById('adminTotals');
-  const votersBox = document.getElementById('adminVoters');
-  totalsBox.innerHTML = 'Загрузка…';
-  votersBox.innerHTML = '';
-
-  const totals = {}; SONGS.forEach(s => totals[s.id] = 0);
-  let voterEntries = [];
-  try{
-    const l = await storageCall(() => window.storage.list('votes:', true));
-    const keys = (l && l.keys) || [];
-    for(const k of keys){
-      try{
-        const r = await storageCall(() => window.storage.get(k, true));
-        const c = JSON.parse(r.value);
-        Object.keys(c).forEach(id => { if(totals[id] !== undefined) totals[id] += c[id]; });
-        voterEntries.push({voter: k.replace('votes:',''), cart: c});
-      }catch(e){}
-    }
-  }catch(e){}
-
-  const ranked = SONGS.map(s => ({...s, pts: totals[s.id]})).sort((a,b) => b.pts - a.pts);
-  totalsBox.innerHTML = ranked.map(s => `
-    <div class="admin-row">
-      <div class="af">${s.flag}</div>
-      <div class="an">${s.country} — ${s.artist}</div>
-      <div class="apts">${s.pts}</div>
-    </div>
-  `).join('');
-
-  if(voterEntries.length === 0){
-    votersBox.innerHTML = '<div class="voter-line">Пока никто не проголосовал</div>';
-  } else {
-    votersBox.innerHTML = voterEntries.map(v => {
-      const parts = SONGS.filter(s => v.cart[s.id] > 0).map(s => `${s.flag}×${v.cart[s.id]}`).join('  ');
-      return `<div class="voter-line">${v.voter.slice(0,10)}… → ${parts || '—'}</div>`;
-    }).join('');
-  }
-}
-
-async function init(){
-  await ensureVoterId();
-  await loadOwnVote();
+function init(){
+  loadOwnVote();
   renderList();
   submitBtn.addEventListener('click', submitVote);
-  await maybeRenderAdmin();
 }
 
 init();
