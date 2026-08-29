@@ -8,87 +8,195 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#080D24;
-    --bg2:#0D1538;
-    --card:#111A42;
-    --card-active:#182660;
-    --blue:#4361FF;
-    --blue-light:#8AA0FF;
-    --pink:#FF3D71;
-    --white:#F5F7FF;
-    --grey:#8992BE;
-    --grey-dim:#5E6690;
-    --line:rgba(245,247,255,0.09);
-    --ok:#3DDC97;
+    --bg:#07091C;
+    --bg2:#0D1130;
+    --card:#12163A;
+    --card-hover:#161A44;
+    --card-active:#1B2160;
+    --blue:#4E6BFF;
+    --blue-light:#94A8FF;
+    --pink:#FF4785;
+    --gold:#FFC857;
+    --white:#F6F7FF;
+    --grey:#8D93C4;
+    --grey-dim:#5A5F8A;
+    --line:rgba(246,247,255,0.08);
+    --line-strong:rgba(246,247,255,0.16);
+    --ok:#3EDC97;
     --err:#FF6B6B;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
   body{
-    background:
-      radial-gradient(900px 420px at 50% -10%, rgba(67,97,255,0.16), transparent 60%),
-      var(--bg);
+    background:var(--bg);
     color:var(--white);
     font-family:'Inter', sans-serif;
     min-height:100vh;
-    padding-bottom:120px;
+    padding-bottom:128px;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    position:relative;
   }
+
+  .glow-top{
+    position:fixed;
+    top:-360px; left:50%;
+    width:900px; height:900px;
+    transform:translateX(-50%) rotate(0deg);
+    background:conic-gradient(from 0deg, #4E6BFF, #7C4DFF, #FF4785, #FFC857, #3EDC97, #4E6BFF);
+    filter:blur(170px) saturate(90%);
+    opacity:0.22;
+    border-radius:50%;
+    z-index:0;
+    pointer-events:none;
+    animation:glow-spin 28s linear infinite;
+  }
+  @keyframes glow-spin{
+    from{ transform:translateX(-50%) rotate(0deg); }
+    to{ transform:translateX(-50%) rotate(360deg); }
+  }
+  .content{position:relative; z-index:1;}
 
   nav{
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 24px; border-bottom:1px solid var(--line);
-    background:rgba(13,21,56,0.85);
-    backdrop-filter:blur(10px);
+    background:rgba(9,12,32,0.82);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
     position:sticky; top:0; z-index:20;
   }
-  .logo{font-weight:800; font-size:18px; letter-spacing:-0.01em;}
-  .logo span{color:var(--blue-light);}
-  .tag{
-    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.12em;
-    color:var(--blue-light); border:1px solid rgba(67,97,255,0.35); background:rgba(67,97,255,0.08);
-    padding:5px 10px; border-radius:6px; text-transform:uppercase;
+  .logo{font-weight:800; font-size:19px; letter-spacing:-0.02em;}
+  .logo span{
+    background:linear-gradient(90deg, var(--blue-light), var(--pink), var(--gold), var(--blue-light));
+    background-size:300% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:text-shimmer 5s linear infinite;
+  }
+  @keyframes text-shimmer{
+    0%{background-position:0% 50%;}
+    100%{background-position:300% 50%;}
+  }
+  .navtag{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.14em;
+    color:var(--gold); border:1px solid rgba(255,200,87,0.3); background:rgba(255,200,87,0.08);
+    padding:6px 11px; border-radius:99px; text-transform:uppercase;
   }
 
   .wrap{max-width:640px; margin:0 auto; padding:0 20px;}
 
-  .hero{padding:44px 0 26px; text-align:center;}
-  .hero h1{font-size:clamp(27px,6vw,36px); font-weight:900; letter-spacing:-0.02em;}
-  .hero p{color:var(--grey); font-size:14px; margin-top:10px; line-height:1.55; max-width:440px; margin-inline:auto;}
+  .hero{padding:52px 0 30px; text-align:center;}
+  .eyebrow{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:11px;
+    letter-spacing:0.16em; color:var(--blue-light); text-transform:uppercase; margin-bottom:14px;
+    opacity:0.85;
+  }
+  .hero h1{
+    font-size:clamp(28px,6.4vw,38px); font-weight:900; letter-spacing:-0.025em; line-height:1.08;
+  }
+  .hero p{color:var(--grey); font-size:14.5px; margin-top:12px; line-height:1.6; max-width:420px; margin-inline:auto;}
   .rules{
-    display:inline-flex; gap:10px; margin-top:20px; flex-wrap:wrap; justify-content:center;
+    display:inline-flex; gap:8px; margin-top:22px; flex-wrap:wrap; justify-content:center;
     font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--blue-light);
   }
-  .rules span{border:1px solid rgba(67,97,255,0.3); background:rgba(67,97,255,0.07); padding:7px 12px; border-radius:99px;}
+  .rules span{
+    border:1px solid var(--line-strong); background:rgba(78,107,255,0.06);
+    padding:7px 13px; border-radius:99px;
+  }
+  .rules span.live{color:var(--ok); border-color:rgba(62,220,151,0.3); background:rgba(62,220,151,0.08);}
+  .rules span.live::before{
+    content:''; display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--ok); margin-right:6px; box-shadow:0 0 0 3px rgba(62,220,151,0.2);
+  }
 
-  .list{margin-top:24px; display:flex; flex-direction:column; gap:10px;}
+  .list{margin-top:28px; display:flex; flex-direction:column; gap:12px;}
   .item{
-    display:flex; align-items:center; gap:14px;
-    padding:16px; border-radius:14px;
+    display:flex; align-items:center; gap:15px;
+    padding:16px; border-radius:18px;
     background:var(--card); border:1px solid var(--line);
-    transition:background .18s ease, border-color .18s ease;
+    box-shadow:0 1px 0 rgba(255,255,255,0.02) inset, 0 8px 20px -14px rgba(0,0,0,0.6);
+    transition:background .2s ease, border-color .2s ease, transform .15s ease, box-shadow .2s ease;
   }
-  .item.active{background:var(--card-active); border-color:rgba(67,97,255,0.4);}
+  .item:hover{border-color:var(--line-strong); transform:translateY(-1px);}
+  .item.active{
+    background:var(--card-active); border-color:rgba(78,107,255,0.45);
+    box-shadow:0 0 0 1px rgba(78,107,255,0.15) inset, 0 10px 24px -14px rgba(78,107,255,0.35);
+  }
   .item .flag{
-    font-size:24px; width:46px; height:46px; flex-shrink:0;
+    font-size:23px; width:48px; height:48px; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
-    background:rgba(245,247,255,0.05); border-radius:12px;
+    background:rgba(246,247,255,0.045); border:1px solid var(--line); border-radius:13px;
+    background-size:cover; background-position:center;
   }
-  .item .meta{flex:1; min-width:0;}
+  .item .meta{flex:1; min-width:0; cursor:pointer;}
+  .item .meta:hover .artist{color:var(--blue-light);}
+
+  #infoOverlay{
+    position:fixed; inset:0; background:rgba(4,6,18,0.72);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:none; align-items:flex-end; justify-content:center;
+    z-index:50; padding:0;
+  }
+  #infoOverlay.open{display:flex;}
+  .info-card{
+    width:100%; max-width:640px; max-height:82vh; overflow-y:auto;
+    background:var(--bg2); border:1px solid var(--line-strong);
+    border-radius:22px 22px 0 0;
+    padding:24px 22px calc(24px + env(safe-area-inset-bottom));
+    animation:info-up .22s ease;
+  }
+  @media(min-width:680px){
+    #infoOverlay{align-items:center;}
+    .info-card{border-radius:22px; max-width:480px;}
+  }
+  @keyframes info-up{ from{transform:translateY(24px); opacity:0;} to{transform:translateY(0); opacity:1;} }
+  .info-photo{width:100%; height:200px; object-fit:cover; border-radius:16px; display:block; margin-bottom:16px;}
+  .info-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .info-flag{
+    font-size:34px; width:58px; height:58px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(246,247,255,0.05); border:1px solid var(--line); border-radius:16px;
+  }
+  .info-close{
+    width:32px; height:32px; border-radius:9px; border:1px solid var(--line);
+    background:rgba(246,247,255,0.04); color:var(--white); font-size:16px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .info-close:hover{border-color:var(--blue-light);}
+  .info-country{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--grey-dim); margin-top:14px;
+  }
+  .info-artist{font-weight:800; font-size:22px; margin-top:4px; letter-spacing:-0.01em;}
+  .info-song{font-size:14.5px; color:var(--grey); margin-top:2px;}
+  .info-badge{
+    display:inline-block; margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:0.06em; color:var(--gold); background:rgba(255,200,87,0.1);
+    border:1px solid rgba(255,200,87,0.28); padding:3px 9px; border-radius:99px; text-transform:uppercase;
+  }
+  .info-blurb{font-size:14px; line-height:1.65; color:var(--white); margin-top:18px; opacity:0.92;}
+  .item .meta .toprow{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   .item .meta .country{
     font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.1em;
     text-transform:uppercase; color:var(--grey-dim);
   }
-  .item .meta .artist{font-weight:700; font-size:16px; margin-top:3px; letter-spacing:-0.01em;}
+  .item .meta .badge{
+    font-family:'JetBrains Mono', monospace; font-size:9px; letter-spacing:0.06em;
+    color:var(--gold); background:rgba(255,200,87,0.1); border:1px solid rgba(255,200,87,0.28);
+    padding:2px 7px; border-radius:99px; text-transform:uppercase;
+  }
+  .item .meta .artist{font-weight:700; font-size:16.5px; margin-top:4px; letter-spacing:-0.01em;}
   .item .meta .song{font-size:13px; color:var(--grey); margin-top:1px;}
 
-  .stepper{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  .stepper{display:flex; align-items:center; gap:9px; flex-shrink:0;}
   .stepper button{
-    width:32px; height:32px; border-radius:9px; border:1px solid var(--line);
-    background:rgba(245,247,255,0.04); color:var(--white); font-size:16px; font-weight:700;
+    width:33px; height:33px; border-radius:10px; border:1px solid var(--line);
+    background:rgba(246,247,255,0.04); color:var(--white); font-size:17px; font-weight:700;
     cursor:pointer; display:flex; align-items:center; justify-content:center;
-    transition:background .15s ease, border-color .15s ease, opacity .15s ease;
+    transition:background .15s ease, border-color .15s ease, opacity .15s ease, transform .1s ease;
   }
-  .stepper button:hover:not(:disabled){border-color:var(--blue-light); background:rgba(67,97,255,0.14);}
-  .stepper button:disabled{opacity:0.25; cursor:not-allowed;}
+  .stepper button:hover:not(:disabled){border-color:var(--blue-light); background:rgba(78,107,255,0.16);}
+  .stepper button:active:not(:disabled){transform:scale(0.92);}
+  .stepper button:disabled{opacity:0.22; cursor:not-allowed;}
   .stepper .count{
     width:20px; text-align:center; font-family:'JetBrains Mono', monospace;
     font-weight:700; font-size:15px; color:var(--blue-light);
@@ -96,44 +204,46 @@
 
   .cartbar{
     position:fixed; bottom:0; left:0; right:0;
-    background:rgba(13,21,56,0.92); backdrop-filter:blur(10px);
+    background:rgba(9,12,32,0.88); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
     border-top:1px solid var(--line);
-    padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+    padding:15px 20px calc(15px + env(safe-area-inset-bottom));
     z-index:30;
+    box-shadow:0 -12px 30px -20px rgba(0,0,0,0.7);
   }
   .cartbar-inner{max-width:640px; margin:0 auto; display:flex; align-items:center; gap:16px;}
   .cart-info{flex:1;}
-  .cart-info .label{font-size:11px; color:var(--grey); font-family:'JetBrains Mono', monospace; letter-spacing:0.06em;}
+  .cart-info .label{font-size:10.5px; color:var(--grey); font-family:'JetBrains Mono', monospace; letter-spacing:0.07em;}
   .cart-info .count{font-weight:800; font-size:16px; color:var(--white);}
-  .progress{height:5px; background:rgba(255,255,255,0.07); border-radius:99px; margin-top:7px; overflow:hidden;}
-  .progress-fill{height:100%; background:linear-gradient(90deg, var(--blue), var(--pink)); border-radius:99px; transition:width .25s ease; width:0%;}
+  .progress{height:6px; background:rgba(255,255,255,0.06); border-radius:99px; margin-top:8px; overflow:hidden;}
+  .progress-fill{height:100%; background:linear-gradient(90deg, var(--blue), var(--pink)); border-radius:99px; transition:width .3s ease; width:0%;}
   .submit-btn{
     font-family:'Inter', sans-serif; font-weight:700; font-size:14px;
-    background:var(--blue); color:#fff; border:none; border-radius:11px;
-    padding:14px 26px; cursor:pointer; white-space:nowrap;
+    background:linear-gradient(135deg, var(--blue), #6A4CFF); color:#fff; border:none; border-radius:12px;
+    padding:15px 28px; cursor:pointer; white-space:nowrap;
     transition:opacity .15s ease, transform .1s ease, background .15s ease;
-    min-width:120px;
+    min-width:128px;
+    box-shadow:0 8px 20px -10px rgba(78,107,255,0.6);
   }
   .submit-btn:hover:not(:disabled){opacity:0.92;}
-  .submit-btn:disabled{opacity:0.3; cursor:not-allowed;}
+  .submit-btn:disabled{opacity:0.28; cursor:not-allowed; box-shadow:none;}
   .submit-btn:active{transform:scale(0.97);}
-  .submit-btn.retry{background:var(--err);}
+  .submit-btn.retry{background:linear-gradient(135deg, var(--err), #FF3D71); box-shadow:0 8px 20px -10px rgba(255,107,107,0.6);}
 
   .status-msg{
     text-align:center; font-family:'JetBrains Mono', monospace; font-size:12px;
-    padding:14px 20px 2px; min-height:18px; color:var(--blue-light);
+    padding:16px 20px 2px; min-height:18px; color:var(--blue-light);
   }
   .status-msg.ok{color:var(--ok);}
   .status-msg.err{color:var(--err);}
 
-  #admin{max-width:640px; margin:50px auto 0; padding:0 20px;}
+  #admin{max-width:640px; margin:56px auto 0; padding:0 20px;}
   .admin-title{
-    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em;
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:0.14em;
     text-transform:uppercase; color:var(--pink); margin-bottom:14px;
     display:flex; align-items:center; gap:10px;
   }
   .admin-title::after{content:''; flex:1; height:1px; background:var(--line);}
-  .admin-box{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:14px;}
+  .admin-box{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:14px;}
   .admin-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px;}
   .admin-row:last-child{border-bottom:none;}
   .admin-row .af{font-size:16px; width:22px;}
@@ -142,21 +252,25 @@
   .voter-line{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--grey); padding:6px 0; border-bottom:1px dashed var(--line);}
   .voter-line:last-child{border-bottom:none;}
 
-  footer{text-align:center; color:var(--grey-dim); font-size:11px; margin-top:50px; padding-bottom:20px; font-family:'JetBrains Mono', monospace; letter-spacing:0.06em;}
+  footer{text-align:center; color:var(--grey-dim); font-size:11px; margin-top:56px; padding-bottom:22px; font-family:'JetBrains Mono', monospace; letter-spacing:0.07em;}
 </style>
 </head>
 <body>
 
+<div class="glow-top"></div>
+
+<div class="content">
 <nav>
   <div class="logo">Wild<span>Vision</span></div>
-  <div class="tag">Первый полу-финал</div>
+  <div class="navtag">1-й полуфинал</div>
 </nav>
 
 <div class="wrap">
   <div class="hero">
+    <div class="eyebrow">Roblox × TikTok Song Contest</div>
     <h1>Отдай свой голос</h1>
-    <p>Распредели голоса между номерами финала. Можно голосовать за один и тот же номер несколько раз.</p>
-    <div class="rules"><span>До 10 голосов</span><span>Голосование открыто</span></div>
+    <p>Распредели голоса между номерами первого полуфинала. Можно голосовать за один и тот же номер несколько раз.</p>
+    <div class="rules"><span>До 20 голосов</span><span class="live">Голосование открыто</span></div>
   </div>
 
   <div class="list" id="list"></div>
@@ -167,7 +281,7 @@
 <div class="cartbar">
   <div class="cartbar-inner">
     <div class="cart-info">
-      <div class="label">ВАШИ ГОЛОСА: <span class="count" id="cartCount">0</span>/10</div>
+      <div class="label">ВАШИ ГОЛОСА: <span class="count" id="cartCount">0</span>/20</div>
       <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
     </div>
     <button class="submit-btn" id="submitBtn" disabled>Оформить</button>
@@ -181,20 +295,43 @@
   <div class="admin-box" id="adminVoters"></div>
 </div>
 
+<div id="infoOverlay">
+  <div class="info-card">
+    <div id="infoPhotoWrap"></div>
+    <div class="info-top">
+      <div class="info-flag" id="infoFlag"></div>
+      <button class="info-close" id="infoClose">✕</button>
+    </div>
+    <div class="info-country" id="infoCountry"></div>
+    <div class="info-artist" id="infoArtist"></div>
+    <div class="info-song" id="infoSong"></div>
+    <div id="infoBadgeWrap"></div>
+    <div class="info-blurb" id="infoBlurb"></div>
+  </div>
+</div>
+
 <footer>WILDVISION · FAN-EDITION · 2026</footer>
+</div>
 
 <script>
 // Google Apps Script Web App URL — backend for shared vote storage (Google Sheet).
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_TJfrJ9MOOahH9XchMPIo2dkN9Ux3m8pfQ0Qrx6-Y3hgrDcgTjUHHxfqoznaUi8NBfg/exec';
 
 const SONGS = [
-  {id:'usa',     flag:'🇺🇸', country:'США',                   artist:'Lady Gaga', song:'Paparazzi'},
-  {id:'russia',  flag:'🇷🇺', country:'Россия',                 artist:'Dead Blonde', song:'Пионерка'},
-  {id:'belgium', flag:'🇧🇪', country:'Бельгия',                artist:'Трейси', song:'Я человек'},
-  {id:'spm',     flag:'🇵🇲', country:'Сен-Пьер и Микелон',     artist:'Satoshi', song:'All We Are About'},
-  {id:'moldova', flag:'🇲🇩', country:'Молдова',                artist:'The Weeknd & Madonna', song:'Popular'}
+  {id:'usa',        flag:'🇺🇸', country:'США',                 artist:'Lady Gaga', song:'Paparazzi', photo:'images/usa.svg',
+    info:'«Paparazzi» вышла в 2008 году на дебютном альбоме The Fame и стала одним из первых больших хитов Леди Гаги — драматичный клип и мощный образ помогли ей закрепиться как одной из самых заметных поп-звёзд своего поколения.'},
+  {id:'russia',      flag:'🇷🇺', country:'Россия',               artist:'Dead Blonde', song:'Пионерка', photo:'images/russia.svg',
+    info:'Dead Blonde — сценический псевдоним Арины Булановой из Санкт-Петербурга. Проект стартовал в 2020 году и быстро набрал популярность в ТикТоке благодаря дерзкому поп-рейв-звучанию и хитам вроде «Мальчик на девятке».'},
+  {id:'belgium',     flag:'🇧🇪', country:'Бельгия',              artist:'Трейси', song:'Я человек', photo:'images/belgium.svg',
+    info:'«Я человек» — вирусный трек, разлетевшийся по ТикТоку и коротким видео: узнаваемый, слегка ироничный куплет быстро превратился в мемную озвучку для миллионов роликов.'},
+  {id:'spm',         flag:'🇵🇲', country:'Сен-Пьер и Микелон',   artist:'Satoshi', song:'All We Are About', photo:'images/spm.svg',
+    info:'Satoshi (настоящее имя Влад Сабажук) — молдавский исполнитель из Кагула, представлявший Молдову на Евровидении с песней «Viva, Moldova!». «All We Are About» — его первый трек полностью на английском языке, вышедший вскоре после конкурса.'},
+  {id:'moldova',     flag:'🇲🇩', country:'Молдова',              artist:'The Weeknd & Madonna', song:'Popular', photo:'images/moldova.svg',
+    info:'«Popular» — совместная работа The Weeknd, Playboi Carti и Мадонны, вышедшая в 2023 году как часть саундтрека к сериалу HBO «The Idol». Трек стал платиновым в США и попал в чарты нескольких стран.'},
+  {id:'switzerland', flag:'🇨🇭', country:'Швейцария',            artist:'Marko Boshnyak', song:'Poison Cake', note:'Евровидение 2025', photo:'images/switzerland.svg',
+    info:'Марко Бошняк победил на хорватском национальном отборе Dora 2025 с песней «Poison Cake» и представлял Хорватию на Евровидении-2025 в Базеле. Ранее, в 2022 году, он уже занимал второе место в Dora с треком «Moli za nas».'}
 ];
-const MAX_VOTES = 10;
+const MAX_VOTES = 20;
 const STORAGE_KEY = 'wildvision-my-cart';
 const VOTER_KEY = 'wildvision-voter-id';
 
@@ -232,9 +369,12 @@ function renderList(){
     const row = document.createElement('div');
     row.className = 'item' + (cart[s.id] > 0 ? ' active' : '');
     row.innerHTML = `
-      <div class="flag">${s.flag}</div>
-      <div class="meta">
-        <div class="country">${s.country}</div>
+      <div class="flag" ${s.photo ? `style="background-image:url('${s.photo}');"` : ''}>${s.photo ? '' : s.flag}</div>
+      <div class="meta" data-info-id="${s.id}">
+        <div class="toprow">
+          <div class="country">${s.country}</div>
+          ${s.note ? `<div class="badge">${s.note}</div>` : ''}
+        </div>
         <div class="artist">${s.artist}</div>
         ${s.song ? `<div class="song">«${s.song}»</div>` : ''}
       </div>
@@ -247,6 +387,7 @@ function renderList(){
     list.appendChild(row);
   });
   list.querySelectorAll('button').forEach(b => b.addEventListener('click', onStep));
+  list.querySelectorAll('[data-info-id]').forEach(el => el.addEventListener('click', () => openInfo(el.dataset.infoId)));
   cartCount.textContent = total;
   progressFill.style.width = (total/MAX_VOTES*100) + '%';
 
@@ -270,6 +411,35 @@ function onStep(e){
   if(act === 'minus' && cart[id] > 0) cart[id]--;
   renderList();
 }
+
+const infoOverlay = document.getElementById('infoOverlay');
+const infoPhotoWrap = document.getElementById('infoPhotoWrap');
+const infoFlag = document.getElementById('infoFlag');
+const infoCountry = document.getElementById('infoCountry');
+const infoArtist = document.getElementById('infoArtist');
+const infoSong = document.getElementById('infoSong');
+const infoBadgeWrap = document.getElementById('infoBadgeWrap');
+const infoBlurb = document.getElementById('infoBlurb');
+const infoClose = document.getElementById('infoClose');
+
+function openInfo(id){
+  const s = SONGS.find(x => x.id === id);
+  if(!s) return;
+  infoPhotoWrap.innerHTML = s.photo ? `<img class="info-photo" src="${s.photo}" alt="${s.artist}">` : '';
+  infoFlag.textContent = s.flag;
+  infoCountry.textContent = s.country;
+  infoArtist.textContent = s.artist;
+  infoSong.textContent = s.song ? `«${s.song}»` : '';
+  infoBadgeWrap.innerHTML = s.note ? `<div class="info-badge">${s.note}</div>` : '';
+  infoBlurb.textContent = s.info || '';
+  infoOverlay.classList.add('open');
+}
+function closeInfo(){
+  infoOverlay.classList.remove('open');
+}
+infoClose.addEventListener('click', closeInfo);
+infoOverlay.addEventListener('click', (e) => { if(e.target === infoOverlay) closeInfo(); });
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeInfo(); });
 
 async function submitVote(){
   const total = totalCart();
