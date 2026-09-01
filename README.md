@@ -1,1 +1,1 @@
-# wildvision
+# wildvision. Ничего интересного, просто конкурс. Голосование по ссылке HTTPS://moksl3295-sketch.github.io/wildvision/wildvision . пока что мы не сделали обычный сайт конкурса, но , вот пока голосование. На этом все, команда WildVision.
